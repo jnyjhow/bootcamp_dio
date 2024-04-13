@@ -19,52 +19,63 @@ VAR_MENU = """
 VAR_LIMITE_SAQUE_VALOR = 500
 VAR_LIMITE_SAQUE_QTD = 3
 
+
+def obter_valor(tipo='depósito'):
+    while True:
+        valor_str = input(f"Informe o valor do {tipo}: ").replace(',', '.')
+        if valor_str.replace('.', '', 1).isdigit():
+            return float(valor_str)
+        else:
+            print(f"Valor inválido! Por favor, informe um número válido para {tipo}.")
+
+
 def main():
 
     lista_transacoes = []
-    saldo = 0
-    numero_saques = 0
 
     while True:
         opcao = input(VAR_MENU).lower()
 
         if opcao == "d":
-            valor = float(input("Informe o valor do depósito: "))
+            valor = obter_valor()
             if valor > 0:
-                saldo += valor
                 data_hora = datetime.datetime.now()
-                lista_transacoes.append((data_hora, f"Depósito: R$ {valor:.2f}"))
+                lista_transacoes.append((data_hora, "Depósito", valor))
             else:
                 print(f"Operação falhou! O valor [{valor}] informado é inválido.")
 
         elif opcao == "s":
-            valor = float(input("Informe o valor do saque: "))
-            excedeu_saldo = valor > saldo
+            valor = obter_valor('saque')
+
+            saldo_atual = sum(valor for _, _, valor in lista_transacoes)
+            numero_saques = sum(1 for _, tipo, _ in lista_transacoes if tipo == "Saque")
+
             excedeu_limite = valor > VAR_LIMITE_SAQUE_VALOR
             excedeu_saques = numero_saques >= VAR_LIMITE_SAQUE_QTD
 
-            if excedeu_saldo:
-                print("Operação falhou! Você não tem saldo suficiente.")
+            if valor > saldo_atual:
+                print(f"Operação falhou! Você não tem saldo [{valor}] suficiente.")
             elif excedeu_limite:
                 print(f"Operação falhou! O valor do saque excede o limite [{VAR_LIMITE_SAQUE_VALOR}].")
             elif excedeu_saques:
                 print(f"Operação falhou! Número máximo [{VAR_LIMITE_SAQUE_QTD}] de saques excedido.")
             elif valor > 0:
-                saldo -= valor
                 data_hora = datetime.datetime.now()
-                lista_transacoes.append((data_hora, f"Saque: R$ {valor:.2f}"))
+                lista_transacoes.append((data_hora, "Saque", -valor))
                 numero_saques += 1
             else:
-                print("Operação falhou! O valor informado é inválido.")
+                print(f"Operação falhou! O valor [{valor}] informado é inválido!")
 
         elif opcao == "e":
             print("\n================ EXTRATO ================")
             if not lista_transacoes:
                 print("Não foram realizadas movimentações.")
             else:
-                for data_hora, movimentacao in lista_transacoes:
-                    print(f"{data_hora.strftime('%d/%m/%Y %H:%M:%S')} - {movimentacao}")
-            print(f"\nSaldo: R$ {saldo:.2f}")
+                saldo_atual = 0
+                for data_hora, tipo, valor in lista_transacoes:
+                    saldo_atual += valor
+                    print(f"{data_hora.strftime('%d/%m/%Y %H:%M:%S')} - {tipo}: R$ {abs(valor):.2f}")
+                print(f"\nSaldo: R$ {saldo_atual:.2f}")
             print(f"==========================================")
 
         elif opcao == "q":
