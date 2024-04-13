@@ -6,6 +6,8 @@ Modificado em: 13/04/2024
 @author: jny_jhow
 """
 
+import datetime
+
 VAR_MENU = """
 [d] Depositar
 [s] Sacar
@@ -30,7 +32,8 @@ def main():
             valor = float(input("Informe o valor do depósito: "))
             if valor > 0:
                 saldo += valor
-                lista_transacoes.append(f"Depósito: R$ {valor:.2f}")
+                data_hora = datetime.datetime.now()
+                lista_transacoes.append((data_hora, f"Depósito: R$ {valor:.2f}"))
             else:
                 print(f"Operação falhou! O valor [{valor}] informado é inválido.")
 
@@ -48,7 +51,8 @@ def main():
                 print(f"Operação falhou! Número máximo [{VAR_LIMITE_SAQUE_QTD}] de saques excedido.")
             elif valor > 0:
                 saldo -= valor
-                lista_transacoes.append(f"Saque: R$ {valor:.2f}")
+                data_hora = datetime.datetime.now()
+                lista_transacoes.append((data_hora, f"Saque: R$ {valor:.2f}"))
                 numero_saques += 1
             else:
                 print("Operação falhou! O valor informado é inválido.")
@@ -58,8 +62,8 @@ def main():
             if not lista_transacoes:
                 print("Não foram realizadas movimentações.")
             else:
-                for movimentacao in lista_transacoes:
-                    print(movimentacao)
+                for data_hora, movimentacao in lista_transacoes:
+                    print(f"{data_hora.strftime('%d/%m/%Y %H:%M:%S')} - {movimentacao}")
             print(f"\nSaldo: R$ {saldo:.2f}")
             print(f"==========================================")
 
